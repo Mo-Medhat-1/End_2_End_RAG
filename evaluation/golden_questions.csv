@@ -1,0 +1,4 @@
+question,expected_answer,expected_source,expected_page
+How many annual leave days are allowed?,21 days,sample_policy.pdf,1
+What is the normal working time?,9 AM to 5 PM,sample_policy.pdf,2
+What should employees do before remote work?,manager approval,sample_policy.pdf,3
