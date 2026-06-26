@@ -1,3 +1,4 @@
+"""Text chunking strategies for document processing."""
 from typing import List
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -7,11 +8,11 @@ def semantic_like_chunk_docs(
     docs: List[Document], chunk_size: int = 700, chunk_overlap: int = 120
 ) -> List[Document]:
     """
-    Educational semantic-like chunking:
-    - Separates by paragraphs first
-    - Then sentences/new lines
-    - Preserves page metadata
-    For stronger true SemanticChunker, use LangChain Experimental + embeddings.
+    Split documents into overlapping chunks using recursive character splitting.
+
+    Separators are ordered by semantic strength:
+    paragraphs → newlines → sentences → words.
+    Each chunk preserves the original page metadata.
     """
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,

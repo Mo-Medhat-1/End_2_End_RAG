@@ -1,27 +1,26 @@
 [project]
-name = "10-e2e-rag-system"
+name = "e2e-rag-system"
 version = "0.1.0"
-description = "Add your description here"
+description = "End-to-End RAG system with PDF ingestion, FAISS vector store, and Qwen LLM"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "accelerate==0.33.0",
-    "faiss-cpu==1.9.0.post1",
+    "streamlit==1.35.0",
     "langchain==0.2.11",
     "langchain-community==0.2.10",
     "langchain-huggingface==0.0.3",
-    "numpy==1.26.4",
-    "pandas==2.2.2",
-    "pillow==10.4.0",
+    "faiss-cpu==1.9.0.post1",
+    "sentence-transformers==3.0.1",
     "pypdf==4.3.1",
     "pypdfium2==4.30.0",
     "pytesseract==0.3.13",
+    "pillow==10.4.0",
+    "huggingface-hub>=0.23.0",
     "pytest==8.3.2",
+    "pandas==2.2.2",
+    "numpy==1.26.4",
     "python-dotenv==1.0.1",
-    "sentence-transformers==3.3.1",
-    "streamlit==1.35.0",
-    "torch",
-    "transformers==4.46.3",
-    "tokenizers==0.20.3",
-    "azure-ai-inference>=1.0.0b9",
 ]
+
+[tool.pyright]
+extraPaths = ["."]

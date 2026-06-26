@@ -1,3 +1,4 @@
+"""End-to-end PDF ingestion pipeline."""
 from src.loaders import load_pdf_pages
 from src.ocr import ocr_pdf_pages, needs_ocr
 from src.metadata import add_page_descriptions
@@ -6,13 +7,32 @@ from src.embeddings import get_embeddings
 from src.vectorstore import build_faiss, save_faiss
 
 
-def ingest_pdf_to_faiss(pdf_path: str, index_dir: str = "vectorstore/faiss_index", use_ocr_if_needed: bool = True):
+def ingest_pdf_to_faiss(
+    pdf_path: str,
+    index_dir: str = "vectorstore/faiss_index",
+    use_ocr_if_needed: bool = True,
+    use_llm_metadata: bool = True,
+) -> dict:
+    """
+    Full ingestion pipeline: PDF → pages → chunks → embeddings → FAISS index.
+
+    Steps:
+        1. Load PDF pages as LangChain Documents
+        2. Run OCR if text extraction yields weak results
+        3. Add page-level descriptions to metadata
+        4. Chunk documents with overlap
+        5. Build and persist FAISS index
+
+    Returns a dict with page count, chunk count, and index directory.
+    """
     docs = load_pdf_pages(pdf_path)
 
     if use_ocr_if_needed and needs_ocr(docs):
         docs = ocr_pdf_pages(pdf_path)
 
-    docs = add_page_descriptions(docs)
+    if use_llm_metadata:
+        docs = add_page_descriptions(docs)
+
     chunks = semantic_like_chunk_docs(docs)
 
     embeddings = get_embeddings()

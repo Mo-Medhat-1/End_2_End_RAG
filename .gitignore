@@ -8,8 +8,21 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Environment variables (secrets)
 .env
 *.env
 
+# Data files (uploaded PDFs)
 data/raw/
 
+# Generated vector store index
+vectorstore/
+
+# Internal drafts (not tracked)
+_wip_backlog/
+
+# IDE / Editor
+.gemini/
+.vscode/
+.idea/

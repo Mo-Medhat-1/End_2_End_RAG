@@ -1,0 +1,38 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python Cache & Compilation files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment configurations and Secrets
+.env
+.env.*
+.git/
+.github/
+
+# Application generated data and vector stores
+vectorstore/
+data/raw/
+data/processed/
+
+# Temp tools and models cache
+.gemini/
+uv.lock
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# IDE configs
+.vscode/
+.idea/
+
+# Documentation
+*.md

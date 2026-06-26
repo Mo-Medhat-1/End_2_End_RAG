@@ -1,44 +1,57 @@
+"""
+Qwen LLM wrapper using Hugging Face Inference API.
+No local model download required — runs on HF servers.
+"""
 import os
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from dotenv import load_dotenv
+from huggingface_hub import InferenceClient
+
+load_dotenv(override=True)
+
 
 
 class QwenLLM:
     """
-    Minimal wrapper around Hugging Face Qwen Instruct models.
-    Recommended for Colab: Qwen/Qwen2.5-0.5B-Instruct or 1.5B on GPU.
+    Lightweight wrapper around Hugging Face Inference API for Qwen models.
+    Uses your HF token to call the model remotely — no GPU or large RAM needed.
     """
-    def __init__(self, model_name: str | None = None, max_new_tokens: int = 350):
-        self.model_name = model_name or os.getenv("QWEN_MODEL", "Qwen/Qwen2.5-0.5B-Instruct")
-        self.max_new_tokens = max_new_tokens
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, trust_remote_code=True)
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_name,
-            torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-            device_map="auto" if torch.cuda.is_available() else None,
-            trust_remote_code=True,
+    def __init__(self, model_name: str | None = None, max_tokens: int = 500):
+        self.model_name = model_name or os.getenv(
+            "QWEN_MODEL", "Qwen/Qwen2.5-0.5B-Instruct"
         )
+        self.max_tokens = max_tokens
 
-        self.pipe = pipeline(
-            "text-generation",
-            model=self.model,
-            tokenizer=self.tokenizer,
-            max_new_tokens=max_new_tokens,
-            temperature=0.1,
-            do_sample=False,
-        )
+        token = os.getenv("huggingface_token") or os.getenv("HF_TOKEN")
+        if not token:
+            raise ValueError(
+                "Hugging Face token not found. "
+                "Set 'huggingface_token' or 'HF_TOKEN' in your .env file, "
+                "or configure it in your Streamlit Cloud Secrets."
+            )
+
+
+        self.client = InferenceClient(model=self.model_name, token=token)
 
     def invoke(self, prompt: str) -> str:
+        """Send a prompt to the Qwen model via HF Inference API."""
         messages = [
-            {"role": "system", "content": "You are a helpful RAG assistant. Answer only from the provided context. If the answer is missing, say you do not know."},
+            {
+                "role": "system",
+                "content": (
+                    "You are a helpful RAG assistant. "
+                    "Answer only from the provided context. "
+                    "If the answer is missing, say you do not know."
+                ),
+            },
             {"role": "user", "content": prompt},
         ]
 
-        if hasattr(self.tokenizer, "apply_chat_template"):
-            formatted = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        else:
-            formatted = prompt
+        response = self.client.chat_completion(
+            messages=messages,
+            max_tokens=self.max_tokens,
+            temperature=0.1,
+        )
+        content = response.choices[0].message.content or ""
+        return content.strip()
 
-        out = self.pipe(formatted)[0]["generated_text"]
-        return out[len(formatted):].strip() if out.startswith(formatted) else out.strip()

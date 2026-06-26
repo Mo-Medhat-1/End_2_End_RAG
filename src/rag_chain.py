@@ -1,52 +1,61 @@
-from typing import Dict, List, Tuple
+"""RAG chain — retrieval-augmented generation with source attribution."""
+from typing import List, Tuple
 from langchain_core.documents import Document
 
 
 def format_context(docs: List[Document]) -> str:
+    """Format retrieved documents into a structured context string."""
     blocks = []
     for i, d in enumerate(docs, start=1):
         meta = d.metadata
         blocks.append(
-            f"[Source {i}] file={meta.get('source')} | page={meta.get('page_number')} | "
-            f"description={meta.get('page_description')}\n{d.page_content}"
+            f"[Source {i}] file={meta.get('source')} | "
+            f"page={meta.get('page_number')} | "
+            f"description={meta.get('page_description')}\n"
+            f"{d.page_content}"
         )
     return "\n\n".join(blocks)
 
 
-def build_prompt(question, docs):
+def build_prompt(question: str, docs: List[Document]) -> str:
+    """Build a structured RAG prompt with context, question, and formatting instructions."""
     context = format_context(docs)
 
-    return f"""
-        You MUST answer using the context below.
+    return f"""You MUST answer using the context below.
 
-        Context:
-        {context}
+Context:
+{context}
 
-        Question:
-        {question}
+Question:
+{question}
 
-        Instructions:
-        - Give a clear direct answer.
-        - If the answer is not found, say: "I don't know based on the document".
-        - Then show supporting evidence.
-        - Then list sources with page numbers.
+Instructions:
+- Give a clear, direct answer.
+- If the answer is not found, say: "I don't know based on the document."
+- Show supporting evidence from the context.
+- List sources with page numbers.
 
-        Format your answer like this:
+Format:
 
-        Direct Answer:
-        \\n\n
-        - <your answer here>
+**Direct Answer:**
+<your answer>
 
-        Evidence:
-        \\n\\n
-        - <supporting text>
+**Evidence:**
+<supporting text from context>
 
-        Sources:
-        - file name + page number
-        """
+**Sources:**
+<file name + page number>
+"""
 
 
-def answer_question(llm, retriever, question: str) -> Tuple[str, List[Document]]:
+def answer_question(
+    llm, retriever, question: str
+) -> Tuple[str, List[Document]]:
+    """
+    Answer a question using retrieval-augmented generation.
+
+    Returns a tuple of (answer_text, retrieved_documents).
+    """
     docs = retriever.invoke(question)
     prompt = build_prompt(question, docs)
     answer = llm.invoke(prompt)
