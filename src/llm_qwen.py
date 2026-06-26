@@ -74,11 +74,11 @@ class QwenLLM:
     def __init__(
         self,
         model_name: str | None = None,
-        max_tokens: int = 512,
+        max_tokens: int = 1024,
         timeout: float = 60.0,
     ) -> None:
         self.model_name = model_name or os.getenv(
-            "QWEN_MODEL", "Qwen/Qwen2.5-0.5B-Instruct"
+            "QWEN_MODEL", "Qwen/Qwen2.5-7B-Instruct"
         )
         self.max_tokens = max_tokens
         self.timeout = timeout
